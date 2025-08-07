@@ -123,6 +123,7 @@ C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Deb
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ContractTracker.Api.csproj.CoreCompileInputs.cache
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ContractTracker.Api.MvcApplicationPartsAssemblyInfo.cs
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ContractTracker.Api.MvcApplicationPartsAssemblyInfo.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ContractTracker.Api.sourcelink.json
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\staticwebassets.build.json
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\staticwebassets.development.json
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\staticwebassets\msbuild.ContractTracker.Api.Microsoft.AspNetCore.StaticWebAssets.props

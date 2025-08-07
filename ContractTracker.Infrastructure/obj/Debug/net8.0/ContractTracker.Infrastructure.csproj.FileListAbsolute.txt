@@ -9,6 +9,7 @@ C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastruct
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.AssemblyInfoInputs.cache
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.AssemblyInfo.cs
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.sourcelink.json
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\Contract.C1227395.Up2Date
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.dll
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\refint\ContractTracker.Infrastructure.dll

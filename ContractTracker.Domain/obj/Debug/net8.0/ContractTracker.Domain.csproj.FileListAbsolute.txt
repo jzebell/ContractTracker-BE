@@ -5,6 +5,7 @@ C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.AssemblyInfoInputs.cache
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.AssemblyInfo.cs
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.csproj.CoreCompileInputs.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.sourcelink.json
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.dll
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\refint\ContractTracker.Domain.dll
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.pdb

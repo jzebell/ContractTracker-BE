@@ -13,11 +13,17 @@ This document ensures seamless continuation across sessions when working on the 
    - Pay special attention to the "Development Progress Log" section
    - Note any "In Progress" items - these are likely where we left off
 
-2. **SESSION_CONTINUITY_GUIDE.md** (this document)
+2. **NEXT_SESSION_START.md** (if it exists in `/contract-tracker-backend/docs/`)
+   - Contains specific handoff notes from the previous session
+   - Includes current state, what's working, and what to build next
+   - Has environment details and gotchas to remember
+   - **If this file exists, it takes priority for understanding the immediate state**
+
+3. **SESSION_CONTINUITY_GUIDE.md** (this document)
    - Ensures you're following the correct protocol
    - Contains the current state checklist
 
-3. **Financials Workbook.xlsx** (if discussing financial calculations)
+4. **Financials Workbook.xlsx** (if discussing financial calculations)
    - Contains the original Excel formulas and business logic
    - Reference for wrap rate calculations and financial requirements
 
@@ -29,16 +35,18 @@ After reading the context documents, verify the current state by checking:
 ✓ What was in progress when the session ended?
 ✓ Are there any known issues that need addressing?
 ✓ What's the next item in the roadmap?
+✓ Are there specific handoff notes to follow?
 ```
 
 ### Step 3: Acknowledge Context to User
 Start the session by confirming what you understand:
 
 ```
-"I've reviewed the project context. I can see that we:
-- Last completed: [specific feature]
+"I've reviewed the project context and handoff notes. I can see that we:
+- Last completed: [specific feature from NEXT_SESSION_START.md or PROJECT_CONTEXT.md]
 - Were working on: [in-progress item]
 - Next priority is: [next roadmap item]
+- [Any specific notes from the handoff]
 
 Shall we continue with [specific task] or would you like to focus on something else?"
 ```
@@ -50,7 +58,9 @@ Shall we continue with [specific task] or would you like to focus on something e
 contract-tracker-backend/
 ├── docs/
 │   ├── PROJECT_CONTEXT.md      # Main project documentation
-│   └── SESSION_CONTINUITY_GUIDE.md  # This file
+│   ├── SESSION_CONTINUITY_GUIDE.md  # This file
+│   ├── NEXT_SESSION_START.md   # Session handoff notes (if exists)
+│   └── Financials Workbook.xlsx # Business logic reference
 ├── ContractTracker.Domain/      # Entity definitions
 │   └── Entities/               # Check here for domain model
 ├── ContractTracker.Infrastructure/
@@ -65,9 +75,12 @@ contract-tracker-backend/
 ### Frontend Structure
 ```
 contract-tracker-frontend/
+├── .env                        # Environment variables (API URL)
 ├── src/
 │   ├── components/            # React components
-│   │   └── LCAT/             # LCAT management UI
+│   │   ├── LCAT/             # LCAT management UI
+│   │   ├── Resource/         # Resource management UI
+│   │   └── Debug/            # API debug panel
 │   ├── services/             # API integration
 │   ├── types/                # TypeScript definitions
 │   └── App.tsx               # Main app component
@@ -75,22 +88,25 @@ contract-tracker-frontend/
 
 ## 🚦 Current System Status
 
-### ✅ Completed Components
+### ✅ Completed Components (Session 2 - Jan 10, 2025)
 - **Domain Layer**: All entities created with proper encapsulation
 - **Database**: PostgreSQL running in Docker, all migrations applied
 - **LCAT Management**: Full CRUD with inline editing and batch saves
-- **Resource API**: Create and read operations with cost calculations
+- **Resource Management**: Full CRUD with filtering, search, and margin calculations
+- **API Integration**: All endpoints working with proper CORS configuration
+- **Debug Tools**: ApiDebug component for troubleshooting
 
 ### 🔄 In Progress
-- **Resource Frontend**: React components for resource management
 - **Contract Management**: Not started
 - **Financial Dashboard**: Not started
+- **Resource-Contract Assignment**: Not started
 
 ### 📋 Known Configuration
 - **API URL**: http://localhost:5154
 - **Frontend URL**: http://localhost:3000
 - **Database**: PostgreSQL in Docker (port 5432)
-- **Default Wrap Rate**: 2.28x for burdened cost calculations
+- **Default Wrap Rate**: 2.28x for W2, 1.15x for contractors
+- **API Routes**: `/api/LCAT`, `/api/Resource` (note the /api prefix and capitalization)
 
 ## 💡 Development Patterns to Follow
 
@@ -99,12 +115,14 @@ contract-tracker-frontend/
 2. **DTOs**: Separate DTOs for Create, Update, and Read operations
 3. **Validation**: Check uniqueness, existence, and business rules in controllers
 4. **Transactions**: Use transactions for batch operations
+5. **Routes**: Use `/api/[controller]` pattern with proper capitalization
 
 ### Frontend Patterns
 1. **Inline Editing**: Excel-like editing with batch save
 2. **Visual Feedback**: Yellow highlighting for unsaved changes
 3. **Service Layer**: Centralized API calls through service files
 4. **Type Safety**: Full TypeScript types for all data structures
+5. **Error Handling**: Comprehensive try-catch with user feedback
 
 ## 🎯 Quick Decision Reference
 
@@ -124,10 +142,12 @@ contract-tracker-frontend/
 
 Before starting work:
 - [ ] Read PROJECT_CONTEXT.md
+- [ ] Read NEXT_SESSION_START.md (if exists)
 - [ ] Check "Development Progress Log" for last session's work
 - [ ] Verify API is running (`dotnet run` in Api folder)
 - [ ] Verify database is running (`docker ps`)
 - [ ] Verify frontend is running (`npm start` in frontend folder)
+- [ ] Test that Resources and LCATs tabs load data
 - [ ] Ask user: "Should we continue with [last in-progress item]?"
 
 ## 🚨 Common Issues & Quick Fixes
@@ -153,7 +173,33 @@ dotnet add ContractTracker.Api/ContractTracker.Api.csproj reference ContractTrac
 dotnet add ContractTracker.Infrastructure/ContractTracker.Infrastructure.csproj reference ContractTracker.Domain/ContractTracker.Domain.csproj
 ```
 
+### Frontend Won't Connect to Backend
+```bash
+# Check .env file exists with:
+REACT_APP_API_URL=http://localhost:5154
+
+# Restart React app after creating/modifying .env
+npm start
+```
+
+### CORS Errors
+Ensure Program.cs has CORS configured BEFORE UseAuthorization:
+```csharp
+app.UseCors(builder => builder
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
+```
+
 ## 📝 Documentation Maintenance Protocol
+
+### Creating Handoff Notes for Next Session
+At the end of each session, create or update `NEXT_SESSION_START.md` with:
+1. **Session summary** - What was accomplished
+2. **Current state** - What's working
+3. **Next steps** - Clear priorities for next session
+4. **Environment details** - Ports, URLs, configurations
+5. **Gotchas** - Any tricky issues to remember
 
 ### Continuous Updates During Session
 **IMPORTANT: Update PROJECT_CONTEXT.md immediately when:**
@@ -195,12 +241,11 @@ Example update after creating a new feature:
 ```
 
 ### Session End Protocol
-Before ending a session, ensure PROJECT_CONTEXT.md has been updated with:
-1. **Completed items** - All ⏳ items that are now ✅
-2. **New in-progress items** - What's partially done
-3. **Decisions log** - Any choices made during session
-4. **Known issues** - Problems encountered and their solutions
-5. **Next steps** - Clear indication of what to tackle next
+Before ending a session:
+1. Update PROJECT_CONTEXT.md with all progress
+2. Create/Update NEXT_SESSION_START.md with handoff notes
+3. Commit all documentation changes to git
+4. Ensure the project is in a working state
 
 ### Sample Update Command
 When making updates, use clear commit-style messages:
@@ -212,4 +257,4 @@ When making updates, use clear commit-style messages:
 ```
 
 ---
-*Remember: Always start by reading PROJECT_CONTEXT.md to understand where we are in the development journey.*
+*Remember: Always start by reading PROJECT_CONTEXT.md and NEXT_SESSION_START.md (if it exists) to understand where we are in the development journey.*
