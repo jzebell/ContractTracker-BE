@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "ZfaVrVtuBdH7P5yFzXzii8GSlsxfzzMBk9kHy+NvB6Q=",
+  "Source": "ContractTracker.Api",
+  "BasePath": "_content/ContractTracker.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

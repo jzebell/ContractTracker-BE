@@ -1,0 +1,17 @@
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\bin\Debug\net8.0\ContractTracker.Infrastructure.deps.json
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\bin\Debug\net8.0\ContractTracker.Infrastructure.runtimeconfig.json
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\bin\Debug\net8.0\ContractTracker.Infrastructure.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\bin\Debug\net8.0\ContractTracker.Infrastructure.pdb
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\bin\Debug\net8.0\ContractTracker.Domain.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\bin\Debug\net8.0\ContractTracker.Domain.pdb
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.csproj.AssemblyReference.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.AssemblyInfoInputs.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.AssemblyInfo.cs
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\Contract.C1227395.Up2Date
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\refint\ContractTracker.Infrastructure.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.pdb
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ContractTracker.Infrastructure.genruntimeconfig.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Infrastructure\obj\Debug\net8.0\ref\ContractTracker.Infrastructure.dll

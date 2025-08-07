@@ -1,0 +1,11 @@
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\bin\Debug\net8.0\ContractTracker.Domain.deps.json
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\bin\Debug\net8.0\ContractTracker.Domain.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\bin\Debug\net8.0\ContractTracker.Domain.pdb
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.AssemblyInfoInputs.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.AssemblyInfo.cs
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.csproj.CoreCompileInputs.cache
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\refint\ContractTracker.Domain.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ContractTracker.Domain.pdb
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Domain\obj\Debug\net8.0\ref\ContractTracker.Domain.dll
