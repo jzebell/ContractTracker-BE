@@ -1,5 +1,3 @@
-// ContractTracker.Domain/Entities/Contract.cs
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,89 +8,73 @@ namespace ContractTracker.Domain.Entities
     {
         private readonly List<ContractLCAT> _contractLCATs = new();
         private readonly List<ContractResource> _contractResources = new();
-        private readonly List<ContractModification> _modifications = new();
-
-        // Private constructor for EF
-        private Contract() { }
-
-        public Contract(
-            string contractNumber,
-            string contractName,
-            string customerName,
-            string primeContractor,
-            bool isPrime,
-            ContractType contractType,
-            DateTime startDate,
-            DateTime endDate,
-            decimal totalValue,
-            string? description = null)
-        {
-            if (string.IsNullOrWhiteSpace(contractNumber))
-                throw new ArgumentException("Contract number is required", nameof(contractNumber));
-            if (string.IsNullOrWhiteSpace(contractName))
-                throw new ArgumentException("Contract name is required", nameof(contractName));
-            if (string.IsNullOrWhiteSpace(customerName))
-                throw new ArgumentException("Customer name is required", nameof(customerName));
-            if (string.IsNullOrWhiteSpace(primeContractor))
-                throw new ArgumentException("Prime contractor is required", nameof(primeContractor));
-            if (endDate <= startDate)
-                throw new ArgumentException("End date must be after start date", nameof(endDate));
-            if (totalValue <= 0)
-                throw new ArgumentException("Total value must be positive", nameof(totalValue));
-
-            Id = Guid.NewGuid();
-            ContractNumber = contractNumber;
-            ContractName = contractName;
-            CustomerName = customerName;
-            PrimeContractor = primeContractor;
-            IsPrime = isPrime;
-            ContractType = contractType;
-            StartDate = startDate;
-            EndDate = endDate;
-            TotalValue = totalValue;
-            Description = description;
-            Status = ContractStatus.Draft;
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
-            
-            // Initialize standard work hours (can be overridden)
-            StandardFullTimeHours = 1912; // Default annual hours
-        }
+        private readonly List<ContractModification> _contractModifications = new();
 
         public Guid Id { get; private set; }
         public string ContractNumber { get; private set; }
-        public string ContractName { get; private set; }
-        public string CustomerName { get; private set; } // End customer (e.g., government agency)
-        public string PrimeContractor { get; private set; } // May or may not be us
-        public bool IsPrime { get; private set; } // Are we the prime or a sub?
-        public ContractType ContractType { get; private set; }
+        public string CustomerName { get; private set; }
+        public string PrimeContractorName { get; private set; }
+        public bool IsPrime { get; private set; }
+        public ContractType Type { get; private set; }
+        public ContractStatus Status { get; private set; }
         public DateTime StartDate { get; private set; }
         public DateTime EndDate { get; private set; }
         public decimal TotalValue { get; private set; }
         public decimal FundedValue { get; private set; }
-        public string? Description { get; private set; }
-        public ContractStatus Status { get; private set; }
-        public decimal StandardFullTimeHours { get; private set; } // Annual hours for FTE calculation
-        
-        // Tracking fields
+        public int StandardFullTimeHours { get; private set; }
+        public string Description { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime UpdatedAt { get; private set; }
-        public string? CreatedBy { get; private set; }
-        public string? UpdatedBy { get; private set; }
+        public string CreatedBy { get; private set; }
+        public string ModifiedBy { get; private set; }
 
         // Navigation properties
         public IReadOnlyCollection<ContractLCAT> ContractLCATs => _contractLCATs.AsReadOnly();
         public IReadOnlyCollection<ContractResource> ContractResources => _contractResources.AsReadOnly();
-        public IReadOnlyCollection<ContractModification> Modifications => _modifications.AsReadOnly();
+        public IReadOnlyCollection<ContractModification> ContractModifications => _contractModifications.AsReadOnly();
 
-        // Business methods
+        // Constructor for EF Core
+        protected Contract() { }
+
+        // Constructor for creating new contracts
+        public Contract(
+            string contractNumber,
+            string customerName,
+            string primeContractorName,
+            bool isPrime,
+            ContractType type,
+            DateTime startDate,
+            DateTime endDate,
+            decimal totalValue,
+            decimal fundedValue,
+            int standardFullTimeHours,
+            string description,
+            string createdBy)
+        {
+            Id = Guid.NewGuid();
+            ContractNumber = contractNumber;
+            CustomerName = customerName;
+            PrimeContractorName = primeContractorName;
+            IsPrime = isPrime;
+            Type = type;
+            Status = ContractStatus.Draft;
+            StartDate = startDate;
+            EndDate = endDate;
+            TotalValue = totalValue;
+            FundedValue = fundedValue;
+            StandardFullTimeHours = standardFullTimeHours > 0 ? standardFullTimeHours : 1912;
+            Description = description;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+            CreatedBy = createdBy;
+            ModifiedBy = createdBy;
+        }
+
+        // Contract lifecycle methods
         public void Activate()
         {
             if (Status != ContractStatus.Draft)
                 throw new InvalidOperationException("Only draft contracts can be activated");
-            
-            if (FundedValue <= 0)
-                throw new InvalidOperationException("Contract must have funding before activation");
             
             Status = ContractStatus.Active;
             UpdatedAt = DateTime.UtcNow;
@@ -107,76 +89,65 @@ namespace ContractTracker.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void UpdateFunding(decimal fundedAmount, string modificationNumber, string? justification = null)
+        // Funding management
+        public void UpdateFunding(decimal newFundedValue, string justification, string modifiedBy)
         {
-            if (fundedAmount <= 0)
-                throw new ArgumentException("Funded amount must be positive", nameof(fundedAmount));
-            if (fundedAmount > TotalValue)
-                throw new ArgumentException("Funded amount cannot exceed total contract value", nameof(fundedAmount));
-
+            if (newFundedValue > TotalValue)
+                throw new InvalidOperationException("Funded value cannot exceed total contract value");
+            
             var modification = new ContractModification(
                 Id,
-                modificationNumber,
                 ModificationType.FundingChange,
                 FundedValue,
-                fundedAmount,
-                justification
+                newFundedValue,
+                justification,
+                modifiedBy
             );
-
-            _modifications.Add(modification);
-            FundedValue = fundedAmount;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        public void SetStandardHours(decimal annualFullTimeHours)
-        {
-            if (annualFullTimeHours <= 0 || annualFullTimeHours > 2080)
-                throw new ArgumentException("Annual hours must be between 0 and 2080", nameof(annualFullTimeHours));
             
-            StandardFullTimeHours = annualFullTimeHours;
+            _contractModifications.Add(modification);
+            FundedValue = newFundedValue;
+            ModifiedBy = modifiedBy;
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void SetContractBillRate(Guid lcatId, decimal contractBillRate, DateTime effectiveDate, string? justification = null)
+        // LCAT rate override management
+        public void AddLCATOverride(Guid lcatId, decimal overrideRate, DateTime effectiveDate)
         {
-            if (contractBillRate <= 0)
-                throw new ArgumentException("Contract bill rate must be positive", nameof(contractBillRate));
-
-            var existingRate = _contractLCATs.FirstOrDefault(cl => cl.LCATId == lcatId && cl.EffectiveDate == effectiveDate);
-            if (existingRate != null)
+            var existingOverride = _contractLCATs.FirstOrDefault(cl => cl.LCATId == lcatId);
+            if (existingOverride != null)
             {
-                existingRate.UpdateRate(contractBillRate, justification);
+                existingOverride.UpdateRate(overrideRate, effectiveDate);
             }
             else
             {
-                var contractLCAT = new ContractLCAT(Id, lcatId, contractBillRate, effectiveDate, justification);
-                _contractLCATs.Add(contractLCAT);
+                _contractLCATs.Add(new ContractLCAT(Id, lcatId, overrideRate, effectiveDate));
             }
-
             UpdatedAt = DateTime.UtcNow;
         }
 
+        // Resource assignment management
         public void AssignResource(
             Guid resourceId, 
-            DateTime startDate, 
-            DateTime? endDate = null, 
-            decimal allocationPercentage = 100,
-            decimal? customHoursPerYear = null)
+            decimal allocationPercentage, 
+            DateTime startDate,
+            decimal? annualHours = null)
         {
-            if (allocationPercentage <= 0 || allocationPercentage > 100)
-                throw new ArgumentException("Allocation percentage must be between 0 and 100", nameof(allocationPercentage));
-
+            // Check if resource is already assigned
             var existingAssignment = _contractResources.FirstOrDefault(cr => cr.ResourceId == resourceId && cr.IsActive);
             if (existingAssignment != null)
-                throw new InvalidOperationException($"Resource is already assigned to this contract");
+                throw new InvalidOperationException("Resource is already assigned to this contract");
+
+            // Validate allocation doesn't exceed 100%
+            // Note: This would need to check across all contracts for the resource
+            if (allocationPercentage > 100 || allocationPercentage <= 0)
+                throw new InvalidOperationException("Allocation percentage must be between 0 and 100");
 
             var contractResource = new ContractResource(
-                Id, 
-                resourceId, 
-                startDate, 
-                endDate, 
+                Id,
+                resourceId,
                 allocationPercentage,
-                customHoursPerYear ?? (StandardFullTimeHours * allocationPercentage / 100)
+                startDate,
+                annualHours ?? (StandardFullTimeHours * allocationPercentage / 100)
             );
             
             _contractResources.Add(contractResource);
@@ -221,6 +192,19 @@ namespace ContractTracker.Domain.Entities
             return CalculateMonthlyBurnRate() * 12;
         }
 
+        public decimal GetTotalBurned()
+        {
+            // This is a placeholder - in reality, you'd calculate from timesheets or actual costs
+            // For now, estimate based on time elapsed
+            if (StartDate > DateTime.UtcNow)
+                return 0; // Contract hasn't started yet
+            
+            var effectiveEndDate = DateTime.UtcNow < EndDate ? DateTime.UtcNow : EndDate;
+            var monthsElapsed = ((effectiveEndDate - StartDate).Days / 30.0);
+            
+            return CalculateMonthlyBurnRate() * (decimal)Math.Max(0, monthsElapsed);
+        }
+
         public BurnRateAnalysis AnalyzeBurnRate()
         {
             var monthlyBurn = CalculateMonthlyBurnRate();
@@ -256,44 +240,67 @@ namespace ContractTracker.Domain.Entities
                     analysis.WarningLevel = FundingWarningLevel.High;
                 else if (analysis.MonthsUntilFundingDepleted <= 6)
                     analysis.WarningLevel = FundingWarningLevel.Medium;
+                else if (analysis.MonthsUntilFundingDepleted <= 12)
+                    analysis.WarningLevel = FundingWarningLevel.Low;
                 else
                     analysis.WarningLevel = FundingWarningLevel.None;
+            }
+            else
+            {
+                analysis.MonthsUntilFundingDepleted = int.MaxValue;
+                analysis.WarningLevel = FundingWarningLevel.None;
             }
 
             return analysis;
         }
 
-        private decimal GetTotalBurned()
+        public FundingWarningLevel CalculateFundingWarningLevel()
         {
-            // This would calculate actual burned based on timesheet data
-            // For now, estimate based on time elapsed
-            var monthsElapsed = (DateTime.UtcNow - StartDate).Days / 30.0;
-            return CalculateMonthlyBurnRate() * (decimal)monthsElapsed;
+            var analysis = AnalyzeBurnRate();
+            return analysis.WarningLevel;
+        }
+
+        // Update methods for existing properties
+        public void UpdateDetails(
+            string customerName,
+            string primeContractorName,
+            bool isPrime,
+            ContractType type,
+            DateTime startDate,
+            DateTime endDate,
+            decimal totalValue,
+            int standardFullTimeHours,
+            string description,
+            string modifiedBy)
+        {
+            CustomerName = customerName;
+            PrimeContractorName = primeContractorName;
+            IsPrime = isPrime;
+            Type = type;
+            StartDate = startDate;
+            EndDate = endDate;
+            TotalValue = totalValue;
+            StandardFullTimeHours = standardFullTimeHours;
+            Description = description;
+            ModifiedBy = modifiedBy;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
 
+    // Enums
     public enum ContractType
     {
-        FixedPrice,
         TimeAndMaterials,
+        FixedPrice,
         CostPlus,
-        LaborHourOnly
+        LaborHour
     }
 
     public enum ContractStatus
     {
-        Draft,      // For proposals and planning
-        Active,     // Currently executing
-        Closed      // Completed or terminated
-    }
-
-    public enum ModificationType
-    {
-        FundingChange,
-        PeriodOfPerformanceChange,
-        ScopeChange,
-        RateChange,
-        Other
+        Draft,
+        Active,
+        Closed
     }
 
     public enum FundingWarningLevel
@@ -305,170 +312,11 @@ namespace ContractTracker.Domain.Entities
         Critical
     }
 
-    // Supporting entities
-    public class ContractLCAT
+    public enum ModificationType
     {
-        private ContractLCAT() { }
-
-        public ContractLCAT(Guid contractId, Guid lcatId, decimal contractBillRate, DateTime effectiveDate, string? justification = null)
-        {
-            Id = Guid.NewGuid();
-            ContractId = contractId;
-            LCATId = lcatId;
-            ContractBillRate = contractBillRate;
-            EffectiveDate = effectiveDate;
-            Justification = justification;
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        public Guid Id { get; private set; }
-        public Guid ContractId { get; private set; }
-        public Guid LCATId { get; private set; }
-        public decimal ContractBillRate { get; private set; } // What we bill the customer
-        public DateTime EffectiveDate { get; private set; }
-        public DateTime? EndDate { get; private set; }
-        public string? Justification { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-        public DateTime UpdatedAt { get; private set; }
-
-        // Navigation properties
-        public Contract Contract { get; private set; }
-        public LCAT LCAT { get; private set; }
-
-        public void UpdateRate(decimal newRate, string? justification)
-        {
-            ContractBillRate = newRate;
-            Justification = justification;
-            UpdatedAt = DateTime.UtcNow;
-        }
-    }
-
-    public class ContractResource
-    {
-        private ContractResource() { }
-
-        public ContractResource(
-            Guid contractId, 
-            Guid resourceId, 
-            DateTime startDate, 
-            DateTime? endDate, 
-            decimal allocationPercentage,
-            decimal annualHours)
-        {
-            Id = Guid.NewGuid();
-            ContractId = contractId;
-            ResourceId = resourceId;
-            StartDate = startDate;
-            EndDate = endDate;
-            AllocationPercentage = allocationPercentage;
-            AnnualHours = annualHours;
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        public Guid Id { get; private set; }
-        public Guid ContractId { get; private set; }
-        public Guid ResourceId { get; private set; }
-        public DateTime StartDate { get; private set; }
-        public DateTime? EndDate { get; private set; }
-        public decimal AllocationPercentage { get; private set; }
-        public decimal AnnualHours { get; private set; } // Actual hours for this resource (FT/PT)
-        public bool IsActive => EndDate == null || EndDate > DateTime.UtcNow;
-        
-        // Future feature: Track individual resource funding if sub/fixed
-        public decimal? FixedMonthlyAmount { get; private set; } // For subs or fixed price resources
-        
-        public DateTime CreatedAt { get; private set; }
-        public DateTime UpdatedAt { get; private set; }
-
-        // Navigation properties
-        public Contract Contract { get; private set; }
-        public Resource Resource { get; private set; }
-
-        public void EndAssignment(DateTime endDate)
-        {
-            if (endDate < StartDate)
-                throw new ArgumentException("End date cannot be before start date");
-            
-            EndDate = endDate;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        public void SetCustomHours(decimal annualHours)
-        {
-            if (annualHours <= 0 || annualHours > 2080)
-                throw new ArgumentException("Annual hours must be between 0 and 2080");
-            
-            AnnualHours = annualHours;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        // Future: Set fixed monthly amount for subs
-        public void SetFixedMonthlyAmount(decimal amount)
-        {
-            if (amount <= 0)
-                throw new ArgumentException("Fixed amount must be positive");
-            
-            FixedMonthlyAmount = amount;
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        public decimal CalculateMonthlyBurn()
-        {
-            // If fixed amount is set (for subs), use that
-            if (FixedMonthlyAmount.HasValue)
-                return FixedMonthlyAmount.Value;
-            
-            // Otherwise calculate based on hours
-            var monthlyHours = AnnualHours / 12;
-            // This needs Resource's burdened cost - will be injected via repository
-            return 0; // Placeholder
-        }
-    }
-
-    public class ContractModification
-    {
-        private ContractModification() { }
-
-        public ContractModification(Guid contractId, string modificationNumber, ModificationType type, decimal? previousValue, decimal? newValue, string? justification)
-        {
-            Id = Guid.NewGuid();
-            ContractId = contractId;
-            ModificationNumber = modificationNumber;
-            Type = type;
-            PreviousValue = previousValue;
-            NewValue = newValue;
-            Justification = justification;
-            CreatedAt = DateTime.UtcNow;
-        }
-
-        public Guid Id { get; private set; }
-        public Guid ContractId { get; private set; }
-        public string ModificationNumber { get; private set; }
-        public ModificationType Type { get; private set; }
-        public decimal? PreviousValue { get; private set; }
-        public decimal? NewValue { get; private set; }
-        public string? Justification { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-        public string? CreatedBy { get; private set; }
-
-        // Navigation property
-        public Contract Contract { get; private set; }
-    }
-
-    // Burn rate analysis result
-    public class BurnRateAnalysis
-    {
-        public decimal CurrentMonthlyBurn { get; set; }
-        public decimal CurrentQuarterlyBurn { get; set; }
-        public decimal CurrentAnnualBurn { get; set; }
-        public decimal RemainingFunds { get; set; }
-        public int MonthsRemaining { get; set; } // Until contract end
-        public int MonthsUntilFundingDepleted { get; set; }
-        public DateTime? ProjectedDepletionDate { get; set; }
-        public bool WillExceedFunding { get; set; }
-        public decimal FundingShortfall { get; set; }
-        public FundingWarningLevel WarningLevel { get; set; }
+        FundingChange,
+        ScopeChange,
+        DateChange,
+        RateChange
     }
 }

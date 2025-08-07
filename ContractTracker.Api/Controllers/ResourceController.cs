@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ContractTracker.Api.DTOs.Resource;
+using ContractTracker.Api.DTOs;
 using ContractTracker.Domain.Entities;
 using ContractTracker.Infrastructure.Data;
 
@@ -15,7 +15,6 @@ namespace ContractTracker.Api.Controllers
     public class ResourceController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private const decimal DEFAULT_WRAP_RATE = 2.28m; // Default wrap rate
 
         public ResourceController(AppDbContext context)
         {
@@ -27,12 +26,11 @@ namespace ContractTracker.Api.Controllers
         {
             var resources = await _context.Resources
                 .Include(r => r.LCAT)
-                    .ThenInclude(l => l.Rates)
-                .Where(r => r.IsActive)
+                .Include(r => r.ContractResources)
                 .ToListAsync();
 
-            var dtos = resources.Select(r => MapToDto(r));
-            return Ok(dtos);
+            var resourceDtos = resources.Select(r => MapToDto(r)).ToList();
+            return Ok(resourceDtos);
         }
 
         [HttpGet("{id}")]
@@ -40,7 +38,7 @@ namespace ContractTracker.Api.Controllers
         {
             var resource = await _context.Resources
                 .Include(r => r.LCAT)
-                    .ThenInclude(l => l.Rates)
+                .Include(r => r.ContractResources)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (resource == null)
@@ -52,81 +50,181 @@ namespace ContractTracker.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ResourceDto>> CreateResource(CreateResourceDto dto)
         {
-            // Validate email uniqueness
-            if (await _context.Resources.AnyAsync(r => r.Email == dto.Email))
-                return BadRequest($"Resource with email '{dto.Email}' already exists");
+            // Validate LCAT exists if provided
+            if (dto.LCATId.HasValue)
+            {
+                var lcatExists = await _context.LCATs.AnyAsync(l => l.Id == dto.LCATId.Value);
+                if (!lcatExists)
+                    return BadRequest("Invalid LCAT ID");
+            }
 
-            // Validate LCAT exists
-            var lcat = await _context.LCATs
-                .Include(l => l.Rates)
-                .FirstOrDefaultAsync(l => l.Id == dto.LCATId);
-            
-            if (lcat == null)
-                return BadRequest($"LCAT with ID '{dto.LCATId}' not found");
-
-            // Parse resource type enum
-            if (!Enum.TryParse<ResourceType>(dto.ResourceType, out var resourceType))
-                return BadRequest($"Invalid resource type: {dto.ResourceType}");
+            // Check for duplicate email
+            var emailExists = await _context.Resources.AnyAsync(r => r.Email == dto.Email);
+            if (emailExists)
+                return BadRequest("A resource with this email already exists");
 
             var resource = new Resource(
                 dto.FirstName,
                 dto.LastName,
                 dto.Email,
-                resourceType,
+                dto.Type,
                 dto.LCATId,
-                dto.HourlyRate,
+                dto.PayRate,
                 dto.StartDate,
-                "System"
+                dto.ClearanceLevel ?? "",
+                dto.Location ?? "",
+                dto.Notes ?? "",
+                "System" // CreatedBy - will be replaced with actual user
             );
 
             _context.Resources.Add(resource);
             await _context.SaveChangesAsync();
 
-            // Reload with includes for DTO mapping
-            resource = await _context.Resources
-                .Include(r => r.LCAT)
-                    .ThenInclude(l => l.Rates)
-                .FirstAsync(r => r.Id == resource.Id);
+            // Reload with LCAT
+            await _context.Entry(resource)
+                .Reference(r => r.LCAT)
+                .LoadAsync();
 
             return CreatedAtAction(nameof(GetResource), new { id = resource.Id }, MapToDto(resource));
         }
 
-        private ResourceDto MapToDto(Resource resource)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateResource(Guid id, UpdateResourceDto dto)
         {
-            // Calculate burdened cost based on resource type
-            var wrapRate = resource.ResourceType switch
-            {
-                ResourceType.Subcontractor => 1.15m,
-                ResourceType.Contractor1099 => 1.15m,
-                ResourceType.FixedPrice => 1.0m,
-                _ => DEFAULT_WRAP_RATE // W2Internal
-            };
+            var resource = await _context.Resources.FindAsync(id);
+            if (resource == null)
+                return NotFound();
 
-            var burdenedCost = resource.HourlyRate * wrapRate;
-
-            // Get bill rate from LCAT default rate
-            decimal? billRate = null;
-            if (resource.LCAT != null)
+            // Validate LCAT exists if provided
+            if (dto.LCATId.HasValue)
             {
-                var defaultRate = resource.LCAT.GetCurrentDefaultRate();
-                billRate = defaultRate?.Rate;
+                var lcatExists = await _context.LCATs.AnyAsync(l => l.Id == dto.LCATId.Value);
+                if (!lcatExists)
+                    return BadRequest("Invalid LCAT ID");
             }
 
+            resource.UpdateDetails(
+                dto.FirstName,
+                dto.LastName,
+                dto.Email,
+                dto.Type,
+                dto.LCATId,
+                dto.PayRate,
+                dto.ClearanceLevel ?? "",
+                dto.Location ?? "",
+                dto.Notes ?? "",
+                "System" // ModifiedBy - will be replaced with actual user
+            );
+
+            await _context.SaveChangesAsync();
+
+            // Reload with LCAT
+            await _context.Entry(resource)
+                .Reference(r => r.LCAT)
+                .LoadAsync();
+
+            return Ok(MapToDto(resource));
+        }
+
+        [HttpPut("batch")]
+        public async Task<IActionResult> BatchUpdateResources([FromBody] List<UpdateResourceDto> updates)
+        {
+            var updateResults = new List<object>();
+
+            foreach (var update in updates)
+            {
+                // This is a simplified batch update - in production you'd want more sophisticated handling
+                if (update != null)
+                {
+                    // You'd implement the actual batch update logic here
+                    updateResults.Add(new { success = true, message = "Batch update placeholder" });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(updateResults);
+        }
+
+        [HttpPost("{id}/terminate")]
+        public async Task<IActionResult> TerminateResource(Guid id, [FromBody] DateTime? endDate)
+        {
+            var resource = await _context.Resources
+                .Include(r => r.ContractResources)
+                .FirstOrDefaultAsync(r => r.Id == id);
+                
+            if (resource == null)
+                return NotFound();
+
+            try
+            {
+                resource.Terminate(endDate ?? DateTime.UtcNow, "System");
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Resource terminated successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{id}/reactivate")]
+        public async Task<IActionResult> ReactivateResource(Guid id)
+        {
+            var resource = await _context.Resources.FindAsync(id);
+            if (resource == null)
+                return NotFound();
+
+            resource.Reactivate("System");
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { message = "Resource reactivated successfully" });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteResource(Guid id)
+        {
+            var resource = await _context.Resources
+                .Include(r => r.ContractResources)
+                .FirstOrDefaultAsync(r => r.Id == id);
+                
+            if (resource == null)
+                return NotFound();
+
+            // Check if resource is assigned to any active contracts
+            if (resource.ContractResources.Any(cr => cr.IsActive))
+                return BadRequest("Cannot delete resource that is assigned to active contracts");
+
+            _context.Resources.Remove(resource);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private ResourceDto MapToDto(Resource resource)
+        {
             return new ResourceDto
             {
                 Id = resource.Id,
                 FirstName = resource.FirstName,
                 LastName = resource.LastName,
-                FullName = resource.FullName,
                 Email = resource.Email,
-                ResourceType = resource.ResourceType.ToString(),
+                Type = resource.Type,
                 LCATId = resource.LCATId,
-                LCATName = resource.LCAT?.Name,
-                HourlyRate = resource.HourlyRate,
-                BurdenedCost = burdenedCost,
-                BillRate = billRate,
+                LCATName = resource.LCAT?.Name ?? "Unassigned",
+                PayRate = resource.PayRate,
+                BurdenedCost = resource.BurdenedCost,
                 StartDate = resource.StartDate,
-                IsActive = resource.IsActive
+                EndDate = resource.EndDate,
+                IsActive = resource.IsActive,
+                ClearanceLevel = resource.ClearanceLevel,
+                ClearanceExpirationDate = resource.ClearanceExpirationDate,
+                Location = resource.Location,
+                Notes = resource.Notes,
+                TotalAllocation = resource.GetTotalAllocation(),
+                Margin = resource.CalculateMargin(),
+                IsUnderwater = resource.IsUnderwater(),
+                CreatedAt = resource.CreatedAt,
+                UpdatedAt = resource.UpdatedAt
             };
         }
     }

@@ -6,58 +6,129 @@ namespace ContractTracker.Domain.Entities
 {
     public class LCAT
     {
+        private readonly List<LCATRate> _rates = new();
+        private readonly List<PositionTitle> _positionTitles = new();
+
         public Guid Id { get; private set; }
-        public string Name { get; private set; }
+        public string Code { get; private set; }
+        public string Name { get; private set; }  // This is the title/name of the LCAT
         public string Description { get; private set; }
+        public string Category { get; private set; }
         public bool IsActive { get; private set; }
-        public DateTime CreatedDate { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime UpdatedAt { get; private set; }
         public string CreatedBy { get; private set; }
-        public DateTime? ModifiedDate { get; private set; }
         public string ModifiedBy { get; private set; }
 
-        public ICollection<LCATRate> Rates { get; private set; }
-        public ICollection<PositionTitle> PositionTitles { get; private set; }
-        public ICollection<ContractLCATRate> ContractRates { get; private set; }
+        // Navigation properties
+        public IReadOnlyCollection<LCATRate> Rates => _rates.AsReadOnly();
+        public IReadOnlyCollection<PositionTitle> PositionTitles => _positionTitles.AsReadOnly();
 
-        protected LCAT() 
-        { 
-            Rates = new List<LCATRate>();
-            PositionTitles = new List<PositionTitle>();
-            ContractRates = new List<ContractLCATRate>();
-        }
+        // Constructor for EF Core
+        protected LCAT() { }
 
-        public LCAT(string name, string description, string createdBy)
+        // Constructor for creating new LCATs
+        public LCAT(
+            string code,
+            string name,
+            string description,
+            string category,
+            string createdBy)
         {
             Id = Guid.NewGuid();
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Description = description ?? throw new ArgumentNullException(nameof(description));
-            CreatedBy = createdBy ?? throw new ArgumentNullException(nameof(createdBy));
-            ModifiedBy = createdBy; // Set ModifiedBy same as CreatedBy initially
-            CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-            ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            Code = code;
+            Name = name;
+            Description = description;
+            Category = category;
             IsActive = true;
-            
-            Rates = new List<LCATRate>();
-            PositionTitles = new List<PositionTitle>();
-            ContractRates = new List<ContractLCATRate>();
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
+            CreatedBy = createdBy;
+            ModifiedBy = createdBy;
         }
 
-        public LCATRate GetCurrentPublishedRate(DateTime? asOfDate = null)
+        // Business logic methods
+        public void UpdateDetails(
+            string code,
+            string name,
+            string description,
+            string category,
+            string modifiedBy)
         {
-            var effectiveDate = asOfDate ?? DateTime.UtcNow;
-            return Rates
-                .Where(r => r.RateType == RateType.Published && r.EffectiveDate <= effectiveDate)
+            Code = code;
+            Name = name;
+            Description = description;
+            Category = category;
+            ModifiedBy = modifiedBy;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Deactivate(string modifiedBy)
+        {
+            IsActive = false;
+            ModifiedBy = modifiedBy;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void Reactivate(string modifiedBy)
+        {
+            IsActive = true;
+            ModifiedBy = modifiedBy;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        // Rate management
+        public void AddRate(decimal publishedRate, decimal defaultBillRate, DateTime effectiveDate, string createdBy)
+        {
+            var rate = new LCATRate(Id, publishedRate, defaultBillRate, effectiveDate, createdBy);
+            _rates.Add(rate);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public LCATRate GetCurrentPublishedRate()
+        {
+            return _rates
+                .Where(r => r.RateType == RateType.Published && r.EffectiveDate <= DateTime.UtcNow)
                 .OrderByDescending(r => r.EffectiveDate)
                 .FirstOrDefault();
         }
 
-        public LCATRate GetCurrentDefaultRate(DateTime? asOfDate = null)
+        public LCATRate GetCurrentDefaultRate()
         {
-            var effectiveDate = asOfDate ?? DateTime.UtcNow;
-            return Rates
-                .Where(r => r.RateType == RateType.DefaultBill && r.EffectiveDate <= effectiveDate)
+            return _rates
+                .Where(r => r.RateType == RateType.DefaultBill && r.EffectiveDate <= DateTime.UtcNow)
                 .OrderByDescending(r => r.EffectiveDate)
                 .FirstOrDefault();
         }
+
+        public decimal GetCurrentBillRate()
+        {
+            var defaultRate = GetCurrentDefaultRate();
+            return defaultRate?.Rate ?? 0;
+        }
+
+        // Position title management
+        public void AddPositionTitle(string title, string createdBy)
+        {
+            var positionTitle = new PositionTitle(Id, title, createdBy);
+            _positionTitles.Add(positionTitle);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void RemovePositionTitle(Guid positionTitleId)
+        {
+            var title = _positionTitles.FirstOrDefault(pt => pt.Id == positionTitleId);
+            if (title != null)
+            {
+                title.Deactivate();
+                UpdatedAt = DateTime.UtcNow;
+            }
+        }
+    }
+
+    public enum RateType
+    {
+        Published,
+        DefaultBill
     }
 }

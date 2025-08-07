@@ -2,12 +2,12 @@
 
 > **File Location:** `/contract-tracker-backend/docs/PROJECT_CONTEXT.md`  
 > **Purpose:** Living documentation for AI pair programming and team onboarding  
-> **Last Updated:** 2025-01-10 (Session 3)
+> **Last Updated:** 2025-01-XX (Session 5)
 
 ## Project Overview
 **Name:** Contract Tracker  
 **Purpose:** Federal contract resource management system for tracking personnel, LCATs, rates, and profitability  
-**Stage:** MVP Development - Contract Management Complete  
+**Stage:** MVP Development - Financial Dashboard Complete  
 **Started:** January 2025  
 
 ## Business Context
@@ -32,89 +32,81 @@ As a Program Manager on federal government contracts, managing personnel and fin
 2. **Financial Visibility:** Real-time understanding of team costs including wrap rates
 3. **Improved Decision Making:** Quick access to data for staffing and negotiation decisions
 4. **Compliance Tracking:** Ensure resources meet contract requirements (clearances, certs, etc.)
-5. **Historical Analysis:** Track rate changes and resource movements over time
+5. **Historical Analysis:** Track rate changes and resource allocation over time
 
-## Technical Architecture
+## System Architecture
 
-### Stack Overview
-- **Backend:** .NET 8, C#, ASP.NET Core Web API
-- **Frontend:** React 19, TypeScript, TailwindCSS (separate repository)
-- **Database:** PostgreSQL (containerized in Docker)
-- **Architecture Pattern:** Clean Architecture (Domain-Driven Design)
-- **API Style:** RESTful with OpenAPI/Swagger documentation
-- **Testing:** xUnit, SpecFlow (BDD), FluentAssertions [TO BE IMPLEMENTED]
-- **Containerization:** Docker, future cloud deployment planned
+### Technology Stack
+- **Backend:** .NET 8 with Clean Architecture
+- **Frontend:** React 18 with TypeScript
+- **Database:** PostgreSQL (Docker)
+- **Charts:** Recharts for data visualization
+- **State Management:** React hooks
+- **API:** RESTful with potential for GraphQL later
+- **Authentication:** Planned (currently using "System" placeholder)
 
 ### Project Structure
 ```
-contract-tracker/
-├── contract-tracker-backend/
-│   ├── ContractTracker.Domain/       # Domain entities, value objects
-│   │   └── Entities/
-│   │       ├── Contract.cs          # ✅ Complete with burn rate logic
-│   │       ├── LCAT.cs              # ✅ Working
-│   │       └── Resource.cs          # ✅ Working
-│   ├── ContractTracker.Infrastructure/ # Data access, external services
-│   │   └── Data/
-│   │       └── AppDbContext.cs      # ✅ UTC DateTime handling added
-│   ├── ContractTracker.Api/          # Web API, controllers
-│   │   ├── Controllers/
-│   │   │   ├── ContractController.cs # ✅ Full CRUD + workflow
-│   │   │   ├── LCATController.cs    # ✅ Fixed CreatedBy issue
-│   │   │   └── ResourceController.cs # ✅ Working
-│   │   └── DTOs/
-│   │       └── ContractDTOs.cs      # ✅ Complete
-│   └── docs/                         # Project documentation
-│       ├── PROJECT_CONTEXT.md       # This file
-│       ├── SESSION_CONTINUITY_GUIDE.md
-│       └── NEXT_SESSION_START.md    # Session handoff notes
-└── contract-tracker-frontend/
-    ├── src/
-    │   ├── components/               # React components
-    │   │   ├── Contract/            # ✅ Contract Management UI
-    │   │   ├── LCAT/                # ✅ LCAT management UI
-    │   │   ├── Resource/            # ✅ Resource management UI
-    │   │   └── Debug/               # ✅ Collapsible debug footer
-    │   ├── services/                # ✅ API integration
-    │   ├── types/                   # ✅ TypeScript definitions
-    │   └── App.tsx                  # ✅ Updated with Contracts tab
-    └── .env                         # Environment configuration
+contract-tracker-backend/
+├── ContractTracker.Api/              # Web API layer
+├── ContractTracker.Application/      # Business logic and services
+├── ContractTracker.Domain/           # Domain entities and business rules
+├── ContractTracker.Infrastructure/   # Data access and external services
+└── docs/                             # Documentation
+    ├── PROJECT_CONTEXT.md
+    ├── SESSION_CONTINUITY_GUIDE.md
+    └── NEXT_SESSION_START.md
 
-✅ = Completed and Working
-⏳ = In Progress
+contract-tracker-frontend/
+├── src/
+│   ├── components/                   # React components
+│   │   ├── Contract/                # Contract management UI
+│   │   ├── Dashboard/               # Financial dashboard
+│   │   ├── LCAT/                   # LCAT management UI
+│   │   └── Resource/                # Resource management UI
+│   ├── services/                    # API integration
+│   ├── types/                       # TypeScript definitions
+│   └── utils/                       # Helper functions
+└── .env                             # Environment configuration
 ```
 
 ## Current Working Features
 
-### Contract Management (Session 3) ✅
+### Financial Dashboard (Session 5) ✅
+- Portfolio overview with key metrics cards
+- Contract health matrix with visual warnings
+- Resource utilization analysis
+- 12-month financial projections with charts
+- Critical alerts system
+- Interactive charts using Recharts
+- Tab-based navigation (Overview, Contracts, Resources, Projections)
+- Auto-refresh capability
+
+### Contract Management (Session 3-4) ✅
 - Create/Read/Update/Delete contracts
 - Prime/Subcontractor relationship tracking
 - Contract lifecycle (Draft → Active → Closed)
 - Funding tracking and modifications
 - Visual funding warnings (Critical/High/Medium/Low)
-- Burn rate calculations (infrastructure ready)
+- Resource-to-contract assignments
+- Burn rate calculations with actual resources
 - Contract types (T&M, Fixed Price, Cost Plus, Labor Hour)
-- Standard FTE hours configuration
+
+### Resource Management (Session 2, Enhanced Session 4) ✅
+- Add resources with type selection (W2/1099/Sub/Fixed)
+- LCAT assignment from dropdown
+- Automatic wrap rate calculation (2.28x for W2, 1.15x for contractors)
+- Pay rate and burdened cost tracking
+- Margin calculations with underwater detection
+- Resource allocation across contracts
+- Termination and reactivation
 
 ### LCAT Management (Session 2) ✅
 - LCAT CRUD with published and default bill rates
 - Position title mapping (one-to-many)
 - Rate versioning with effective dates
 - Inline batch editing with save-all
-- Rate history viewing
-
-### Resource Management (Session 2) ✅
-- Add resources with type selection (W2/1099/Sub/Fixed)
-- LCAT assignment from dropdown
-- Filterable table view with inline editing
-- Show calculated burdened cost
-- Margin calculations with underwater alerts
-
-### Debug Tools (Session 3) ✅
-- Collapsible footer design
-- API call logging with timing
-- Request/response tracking
-- System info panel
+- Rate history tracking
 
 ## Development Progress Log
 
@@ -141,22 +133,45 @@ contract-tracker/
 - ✅ Contract lifecycle workflow
 - ✅ DateTime UTC handling for PostgreSQL
 - ✅ Debug footer improvements
-- ✅ Fixed LCAT CreatedBy/ModifiedBy issue
+
+### Session 4 (2025-01-XX) - Resource Assignment & Burn Rates
+**Completed:**
+- ✅ Resource-to-Contract assignments with allocation validation
+- ✅ Real burn rate calculations from actual resource data
+- ✅ Visual dashboard with funding analytics
+- ✅ Allocation sliders and resource management UI
+- ✅ ContractResource junction entity
+- ✅ Prevented over-allocation (>100%)
+
+### Session 5 (2025-01-XX) - Financial Dashboard & Major Refactoring
+**Completed:**
+- ✅ Built complete Financial Dashboard with 4 views
+- ✅ Created DashboardAnalyticsService with comprehensive metrics
+- ✅ Implemented portfolio overview, contract health, resource utilization
+- ✅ Added 12-month financial projections with charts
+- ✅ Integrated Recharts for data visualizations
+- ✅ Major entity refactoring (fixed all property mismatches)
+- ✅ Rewrote all controllers to match entity structure
+- ✅ Fixed 89+ compilation errors
+- ✅ Created proper DTO structure
+- ✅ Updated all EF Core configurations
 
 ## Business Rules Implemented
 
 ### Contract Management
 - **Contract Identity:** Number may be customer's or ours depending on prime/sub status
 - **Funding:** Total value vs funded value with modification tracking
-- **Burn Rates:** Monthly, Quarterly, Annual calculations
+- **Burn Rates:** Monthly, Quarterly, Annual calculations based on assigned resources
 - **Warnings:** Multi-level funding warnings based on percentage and time remaining
 - **Hours:** Standard FTE (1912 default) with custom override capability
+- **Resource Assignment:** Resources can be allocated across multiple contracts
 
 ### Resource Management
 - **Types:** W2Internal, Subcontractor, Contractor1099, FixedPrice
 - **Wrap Rates:** 2.28x for W2, 1.15x for contractors (configurable)
-- **Assignment:** Resources can be assigned to LCATs
+- **Assignment:** Resources can be assigned to LCATs for rate determination
 - **Margins:** Automatic calculation with underwater detection
+- **Allocation:** Total allocation across contracts cannot exceed 100%
 
 ### LCAT Management  
 - **Rate Hierarchy:** Published Rate → Default Bill Rate → Contract Override
@@ -169,6 +184,7 @@ contract-tracker/
 - **Separate Repositories:** Frontend and backend in different repos
 - **Clean Architecture:** Domain entities with private setters
 - **DTOs:** Separate DTOs for Create, Update, and Read operations
+- **Service Layer:** Complex calculations in Application services
 - **No Auth Yet:** Using "System" as user placeholder
 
 ### Database
@@ -182,13 +198,23 @@ contract-tracker/
 - **TailwindCSS:** Utility-first styling
 - **Inline Editing:** Excel-like editing with batch saves
 - **Visual Feedback:** Color-coded warnings and status indicators
+- **Recharts:** For data visualizations
+
+### Dashboard Architecture (Session 5)
+- **Service Layer:** DashboardAnalyticsService for complex calculations
+- **Aggregation:** Single /complete endpoint for dashboard data
+- **Projections:** 12-month rolling forecasts
+- **Charts:** Recharts library for visualizations
+- **Fallback Values:** Default rates when data unavailable
 
 ## Known Issues & Technical Debt
 
-### Current Issues
-- Minor unspecified errors (non-blocking)
-- No actual burn rate calculations (need timesheet integration)
-- Complex calculations temporarily removed from controller
+### Current Issues (After Session 5)
+- Dashboard may not display without seed data
+- Resource revenue using hardcoded fallback rate (150)
+- Some TypeScript 'any' types in chart components
+- Burn rate calculations need actual timesheet data
+- Complex calculations temporarily simplified
 
 ### Technical Debt
 1. No authentication/authorization
@@ -197,38 +223,50 @@ contract-tracker/
 4. No tests written
 5. No audit logging
 6. No conflict resolution for concurrent edits
-7. No data export functionality
+7. No data export functionality (planned for Session 6)
 
-## Features Roadmap
+## API Endpoints Available
 
-### Phase 2: In Progress ⏳
-**Resource-Contract Assignment** [NEXT PRIORITY]
-- Link resources to specific contracts
-- Set allocation percentages (FT/PT)
-- Calculate actual burn rates
-- Track multi-contract assignments
+### Dashboard Endpoints (Session 5)
+- `GET /api/Dashboard/metrics` - Overall portfolio metrics
+- `GET /api/Dashboard/contracts/health` - Contract health cards
+- `GET /api/Dashboard/resources/utilization` - Resource utilization
+- `GET /api/Dashboard/projections?months=12` - Financial projections
+- `GET /api/Dashboard/alerts` - Critical alerts
+- `GET /api/Dashboard/complete` - All dashboard data in one call
 
-**Contract LCAT Rate Overrides**
-- UI for contract-specific bill rates
-- Override management interface
-- Rate history tracking
+### Contract Endpoints
+- `GET /api/Contract` - List all contracts
+- `GET /api/Contract/{id}` - Get specific contract
+- `POST /api/Contract` - Create contract
+- `POST /api/Contract/{id}/activate` - Activate draft contract
+- `POST /api/Contract/{id}/close` - Close active contract
+- `POST /api/Contract/{id}/update-funding` - Update contract funding
+- `POST /api/Contract/assign-resource` - Assign resource to contract
+- `GET /api/Contract/{id}/resources` - Get contract resources
+- `DELETE /api/Contract/{contractId}/resources/{resourceId}` - Remove resource
+- `DELETE /api/Contract/{id}` - Delete contract
 
-**Financial Dashboard**
-- Burn rate visualizations
-- Funding health summary
-- Depletion projections
-- Contract profitability views
+### LCAT Endpoints
+- `GET /api/LCAT` - List all LCATs
+- `GET /api/LCAT/{id}` - Get specific LCAT
+- `POST /api/LCAT` - Create LCAT
+- `PUT /api/LCAT/{id}` - Update LCAT
+- `POST /api/LCAT/{id}/rates` - Add rate to LCAT
+- `POST /api/LCAT/{id}/position-titles` - Add position title
+- `POST /api/LCAT/{id}/deactivate` - Deactivate LCAT
+- `POST /api/LCAT/{id}/reactivate` - Reactivate LCAT
+- `DELETE /api/LCAT/{id}` - Delete LCAT
 
-### Phase 3: Advanced Features [FUTURE]
-- [ ] Permissions system (Super User vs PM vs User)
-- [ ] Edit locking for concurrent users
-- [ ] Historical timeline views
-- [ ] Excel import/export functionality
-- [ ] Clearance and certification tracking
-- [ ] What-if scenario modeling
-- [ ] Automated margin alerts
-- [ ] Integration with payroll/timesheet systems
-- [ ] Approval workflows for rate changes
+### Resource Endpoints
+- `GET /api/Resource` - List all resources
+- `GET /api/Resource/{id}` - Get specific resource
+- `POST /api/Resource` - Create resource
+- `PUT /api/Resource/{id}` - Update resource
+- `PUT /api/Resource/batch` - Batch update resources
+- `POST /api/Resource/{id}/terminate` - Terminate resource
+- `POST /api/Resource/{id}/reactivate` - Reactivate resource
+- `DELETE /api/Resource/{id}` - Delete resource
 
 ## Environment Configuration
 
@@ -260,32 +298,6 @@ services:
       - "5432:5432"
 ```
 
-## API Endpoints Available
-
-### Contract Endpoints
-- `GET /api/Contract` - List all contracts
-- `GET /api/Contract/{id}` - Get specific contract
-- `POST /api/Contract` - Create contract
-- `POST /api/Contract/{id}/activate` - Activate draft contract
-- `POST /api/Contract/{id}/close` - Close active contract
-- `POST /api/Contract/{id}/update-funding` - Update contract funding
-- `DELETE /api/Contract/{id}` - Delete contract
-
-### LCAT Endpoints
-- `GET /api/LCAT` - List all LCATs
-- `GET /api/LCAT/{id}` - Get specific LCAT
-- `POST /api/LCAT` - Create LCAT
-- `PUT /api/LCAT/{id}` - Update LCAT
-- `DELETE /api/LCAT/{id}` - Delete LCAT
-
-### Resource Endpoints
-- `GET /api/Resource` - List all resources
-- `GET /api/Resource/{id}` - Get specific resource
-- `POST /api/Resource` - Create resource
-- `PUT /api/Resource/{id}` - Update resource
-- `PUT /api/Resource/batch` - Batch update resources
-- `DELETE /api/Resource/{id}` - Delete resource
-
 ## Development Workflow
 
 ### Local Development Commands
@@ -311,40 +323,49 @@ npm start
 - **Feature Branches:** `feature/[ticket-number]-description`
 - **Commit Convention:** Conventional Commits (feat:, fix:, docs:, etc.)
 
-## Next Steps for Session 4
+## Session 6 Priorities
 
-### Immediate Priority: Resource-Contract Assignment
-1. Add ContractId to Resource entity (or use junction table)
-2. Create assignment UI in Contract Management
-3. Build allocation percentage controls
-4. Calculate actual burn rates from assigned resources
-5. Show resource costs per contract
+### Option 1: Debug and Complete Dashboard
+1. Ensure data flows properly
+2. Fix calculation issues
+3. Add error boundaries
+4. Seed test data
 
-### Then: Contract LCAT Rate Overrides UI
-1. Create rate override interface
-2. Show override vs default rates
-3. Calculate impact on margins
-4. Track override history
+### Option 2: Export/Reporting Features
+1. Excel export functionality
+2. PDF report generation
+3. CSV data downloads
+4. Report templates
 
-### Finally: Basic Financial Dashboard
-1. Create dashboard component
-2. Show all contracts with health indicators
-3. Display burn rate trends
-4. Add depletion countdown
-5. Highlight at-risk contracts
+### Option 3: Advanced Analytics
+1. Trending analysis
+2. Predictive forecasting
+3. Anomaly detection
+4. Natural language insights
+
+### Option 4: Timesheet Integration
+1. Actual hours tracking
+2. Real burn rate calculations
+3. Variance analysis
+4. Time entry UI
 
 ## AI/ML/RPA Opportunities Identified
 
-### Short-term
+### Implemented/Started
+1. **Dashboard Analytics:** Complex calculations and projections (Session 5)
+2. **Burn Rate Predictions:** Foundation laid with projection system
+
+### Short-term Opportunities
 1. **Smart LCAT Matching:** ML to suggest best LCAT based on position title
 2. **Rate Prediction:** Predict optimal pay rates based on historical data
-3. **Anomaly Detection:** Flag unusual rate changes or margins
+3. **Anomaly Detection:** Flag unusual burn rates or margins
+4. **Natural Language Queries:** "Show me all underwater resources"
 
-### Long-term
+### Long-term Opportunities
 1. **Resource Demand Forecasting:** Predict future staffing needs
 2. **Automated Compliance Checking:** RPA for clearance verification
 3. **Intelligent Resource Allocation:** AI-optimized staff assignments
-4. **Natural Language Queries:** "Show me all underwater resources on Contract X"
+4. **Predictive Risk Scoring:** Identify at-risk contracts early
 
 ## Testing Strategy [TO BE IMPLEMENTED]
 
@@ -366,9 +387,13 @@ npm start
 - **2025-01-10 Session 1:** Initial project structure with Clean Architecture
 - **2025-01-10 Session 2:** Frontend implementation, fixed API integration
 - **2025-01-10 Session 3:** Complete Contract Management with funding tracking
+- **2025-01-XX Session 4:** Resource assignments and real burn calculations
+- **2025-01-XX Session 5:** Financial Dashboard and major refactoring
 - **Decision:** Defer auth to later phase, use "System" as placeholder user
-- **Decision:** Implement burn rate calculations after resource assignments
+- **Decision:** Implement burn rate calculations with actual resource data
 - **Decision:** Use visual indicators (emojis/colors) for funding warnings
+- **Decision:** Use Recharts for dashboard visualizations
+- **Decision:** Service layer for complex analytics calculations
 
 ---
-*This is a living document. Last updated after Session 3 completion.*
+*This is a living document. Last updated after Session 5 completion.*

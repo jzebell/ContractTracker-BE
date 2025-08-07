@@ -28,69 +28,99 @@ namespace ContractTracker.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ContractName")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<decimal?>("ActualBurnedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("ContractNumber")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ContractType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal?>("EstimatedAnnualBurn")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal?>("EstimatedMonthlyBurn")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
                     b.Property<decimal>("FundedValue")
-                        .HasColumnType("numeric");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<bool>("IsPrime")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("PrimeContractor")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTime?>("LastCalculatedDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("StandardFullTimeHours")
-                        .HasColumnType("numeric");
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PrimeContractorName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<decimal>("StandardFTEHours")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("TotalValue")
-                        .HasColumnType("numeric");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ContractNumber")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Contracts_ContractNumber");
 
-                    b.ToTable("Contracts");
+                    b.HasIndex("CustomerName")
+                        .HasDatabaseName("IX_Contracts_CustomerName");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Contracts_Status");
+
+                    b.HasIndex("StartDate", "EndDate")
+                        .HasDatabaseName("IX_Contracts_Dates");
+
+                    b.ToTable("Contracts", (string)null);
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.ContractLCAT", b =>
@@ -99,14 +129,8 @@ namespace ContractTracker.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("ContractBillRate")
-                        .HasColumnType("numeric");
-
                     b.Property<Guid>("ContractId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("EffectiveDate")
                         .HasColumnType("timestamp with time zone");
@@ -114,22 +138,25 @@ namespace ContractTracker.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Justification")
-                        .HasColumnType("text");
-
                     b.Property<Guid>("LCATId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<decimal?>("OverrideBillRate")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContractId");
+                    b.HasIndex("ContractId")
+                        .HasDatabaseName("IX_ContractLCATs_ContractId");
 
-                    b.HasIndex("LCATId");
+                    b.HasIndex("LCATId")
+                        .HasDatabaseName("IX_ContractLCATs_LCATId");
 
-                    b.ToTable("ContractLCATs");
+                    b.HasIndex("ContractId", "LCATId", "EffectiveDate")
+                        .HasDatabaseName("IX_ContractLCATs_Contract_LCAT_Effective");
+
+                    b.ToTable("ContractLCATs", (string)null);
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.ContractLCATRate", b =>
@@ -181,34 +208,36 @@ namespace ContractTracker.Infrastructure.Migrations
                     b.Property<Guid>("ContractId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Justification")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ModificationNumber")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
-                    b.Property<decimal?>("NewValue")
-                        .HasColumnType("numeric");
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal?>("PreviousValue")
-                        .HasColumnType("numeric");
+                    b.Property<decimal>("NewValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<decimal>("PreviousValue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContractId");
+                    b.HasIndex("ContractId")
+                        .HasDatabaseName("IX_ContractModifications_ContractId");
 
-                    b.ToTable("ContractModifications");
+                    b.HasIndex("ModificationDate")
+                        .HasDatabaseName("IX_ContractModifications_Date");
+
+                    b.ToTable("ContractModifications", (string)null);
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.ContractResource", b =>
@@ -218,22 +247,43 @@ namespace ContractTracker.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("AllocationPercentage")
-                        .HasColumnType("numeric");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
 
                     b.Property<decimal>("AnnualHours")
-                        .HasColumnType("numeric");
+                        .HasPrecision(8, 2)
+                        .HasColumnType("numeric(8,2)");
+
+                    b.Property<decimal?>("ContractBillRateOverride")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
 
                     b.Property<Guid>("ContractId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal?>("FixedMonthlyAmount")
-                        .HasColumnType("numeric");
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("ResourceId")
                         .HasColumnType("uuid");
@@ -241,16 +291,23 @@ namespace ContractTracker.Infrastructure.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ContractId");
+                    b.HasIndex("ContractId")
+                        .HasDatabaseName("IX_ContractResources_ContractId");
 
-                    b.HasIndex("ResourceId");
+                    b.HasIndex("ResourceId")
+                        .HasDatabaseName("IX_ContractResources_ResourceId");
 
-                    b.ToTable("ContractResources");
+                    b.HasIndex("ContractId", "ResourceId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_ContractResources_ActiveAssignment")
+                        .HasFilter("\"IsActive\" = true");
+
+                    b.HasIndex("ContractId", "ResourceId", "IsActive")
+                        .HasDatabaseName("IX_ContractResources_Contract_Resource_Active");
+
+                    b.ToTable("ContractResources", (string)null);
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.LCAT", b =>
@@ -261,32 +318,45 @@ namespace ContractTracker.Infrastructure.Migrations
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("ModifiedBy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("LCATs");
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_LCATs_IsActive");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("IX_LCATs_Name");
+
+                    b.ToTable("LCATs", (string)null);
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.LCATRate", b =>
@@ -363,63 +433,78 @@ namespace ContractTracker.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<decimal?>("AnnualSalary")
-                        .HasColumnType("numeric");
+                    b.Property<DateTime?>("ClearanceExpirationDate")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("ContractId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ClearanceLevel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<decimal>("CurrentPayRate")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal?>("FixedPriceAmount")
-                        .HasColumnType("numeric");
-
-                    b.Property<int?>("FixedPriceHours")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("HourlyRate")
-                        .HasColumnType("numeric");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
-                    b.Property<Guid>("LCATId")
+                    b.Property<Guid?>("LCATId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<string>("ResourceType")
+                    b.Property<string>("ModifiedBy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ContractId");
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Resources_Email");
 
-                    b.HasIndex("LCATId");
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_Resources_IsActive");
 
-                    b.ToTable("Resources");
+                    b.HasIndex("LCATId")
+                        .HasDatabaseName("IX_Resources_LCATId");
+
+                    b.HasIndex("FirstName", "LastName")
+                        .HasDatabaseName("IX_Resources_Name");
+
+                    b.ToTable("Resources", (string)null);
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.ContractLCAT", b =>
@@ -433,7 +518,7 @@ namespace ContractTracker.Infrastructure.Migrations
                     b.HasOne("ContractTracker.Domain.Entities.LCAT", "LCAT")
                         .WithMany()
                         .HasForeignKey("LCATId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Contract");
@@ -463,7 +548,7 @@ namespace ContractTracker.Infrastructure.Migrations
             modelBuilder.Entity("ContractTracker.Domain.Entities.ContractModification", b =>
                 {
                     b.HasOne("ContractTracker.Domain.Entities.Contract", "Contract")
-                        .WithMany("Modifications")
+                        .WithMany("ContractModifications")
                         .HasForeignKey("ContractId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -480,9 +565,9 @@ namespace ContractTracker.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("ContractTracker.Domain.Entities.Resource", "Resource")
-                        .WithMany()
+                        .WithMany("ContractResources")
                         .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Contract");
@@ -514,17 +599,10 @@ namespace ContractTracker.Infrastructure.Migrations
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.Resource", b =>
                 {
-                    b.HasOne("ContractTracker.Domain.Entities.Contract", "Contract")
-                        .WithMany()
-                        .HasForeignKey("ContractId");
-
                     b.HasOne("ContractTracker.Domain.Entities.LCAT", "LCAT")
                         .WithMany()
                         .HasForeignKey("LCATId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Contract");
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("LCAT");
                 });
@@ -533,9 +611,9 @@ namespace ContractTracker.Infrastructure.Migrations
                 {
                     b.Navigation("ContractLCATs");
 
-                    b.Navigation("ContractResources");
+                    b.Navigation("ContractModifications");
 
-                    b.Navigation("Modifications");
+                    b.Navigation("ContractResources");
                 });
 
             modelBuilder.Entity("ContractTracker.Domain.Entities.LCAT", b =>
@@ -545,6 +623,11 @@ namespace ContractTracker.Infrastructure.Migrations
                     b.Navigation("PositionTitles");
 
                     b.Navigation("Rates");
+                });
+
+            modelBuilder.Entity("ContractTracker.Domain.Entities.Resource", b =>
+                {
+                    b.Navigation("ContractResources");
                 });
 #pragma warning restore 612, 618
         }

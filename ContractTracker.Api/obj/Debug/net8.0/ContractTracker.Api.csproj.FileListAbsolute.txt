@@ -138,3 +138,5 @@ C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Deb
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ContractTracker.Api.pdb
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ContractTracker.Api.genruntimeconfig.cache
 C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\obj\Debug\net8.0\ref\ContractTracker.Api.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\bin\Debug\net8.0\ContractTracker.Application.dll
+C:\Projects\ContractTracker\contract-tracker-backend\ContractTracker.Api\bin\Debug\net8.0\ContractTracker.Application.pdb

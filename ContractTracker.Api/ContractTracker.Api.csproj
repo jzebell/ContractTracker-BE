@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ContractTracker.Domain\ContractTracker.Domain.csproj" />
     <ProjectReference Include="..\ContractTracker.Infrastructure\ContractTracker.Infrastructure.csproj" />
+    <ProjectReference Include="..\ContractTracker.Application\ContractTracker.Application.csproj" />
   </ItemGroup>
 
 </Project>

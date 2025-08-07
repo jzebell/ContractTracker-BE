@@ -1,5 +1,6 @@
 using ContractTracker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using ContractTracker.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddSwaggerGen();
 // Add Database Context
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IDashboardAnalyticsService, DashboardAnalyticsService>();
 
 // Add CORS service
 builder.Services.AddCors(options =>
