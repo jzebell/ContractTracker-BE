@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ContractTracker.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bd9a4a692d7acad543741d828b3aa43929c3aaf0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ca2cdaf85ef497348d072fed0a882d21e26ddec3")]
 [assembly: System.Reflection.AssemblyProductAttribute("ContractTracker.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ContractTracker.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

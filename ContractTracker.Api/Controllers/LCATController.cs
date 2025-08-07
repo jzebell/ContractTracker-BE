@@ -160,7 +160,7 @@ public async Task<IActionResult> BatchUpdateRates(BatchUpdateRatesDto dto)
                     "System",
                     dto.Notes);
 
-                _context.LCATRates.Add(newPublishedRate);
+                //_context.LCATRates.Add(newPublishedRate);
             }
 
             // Update default bill rate if provided
@@ -180,7 +180,7 @@ public async Task<IActionResult> BatchUpdateRates(BatchUpdateRatesDto dto)
                     "System",
                     dto.Notes);
 
-                _context.LCATRates.Add(newDefaultRate);
+                //_context.LCATRates.Add(newDefaultRate);
             }
         }
 
