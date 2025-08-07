@@ -30,10 +30,12 @@ namespace ContractTracker.Domain.Entities
         {
             Id = Guid.NewGuid();
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Description = description;
-            IsActive = true;
-            CreatedDate = DateTime.UtcNow;
+            Description = description ?? throw new ArgumentNullException(nameof(description));
             CreatedBy = createdBy ?? throw new ArgumentNullException(nameof(createdBy));
+            ModifiedBy = createdBy; // Set ModifiedBy same as CreatedBy initially
+            CreatedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            ModifiedDate = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
+            IsActive = true;
             
             Rates = new List<LCATRate>();
             PositionTitles = new List<PositionTitle>();
